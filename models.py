@@ -9,7 +9,16 @@ db_session = scoped_session(sessionmaker(autocommit = False, bind = engine))
 Base = declarative_base()
 Base.query = db_session.query_property()
 
-class Pessoas(Base):
+class quickcommit():
+    def save(self):
+        db_session.add(self)
+        db_session.commit()
+        
+    def delete(self):
+        db_session.delete(self)
+        db_session.commit()
+
+class Pessoas(Base, quickcommit):
     __tablename__ = 'pessoas'
     id = Column(Integer, primary_key = True)
     nome = Column(String(40), index = True)
@@ -18,24 +27,24 @@ class Pessoas(Base):
     def __repr__(self):
         return '<Pessoa {}>'.format(self.nome)
     
-    def save(self):
-        db_session.add(self)
-        db_session.commit()
-        
-    def delete(self):
-        db_session.delete(self)
-        db_session.commit()
+class Usuarios(Base, quickcommit):
+    __tablename__ = 'usuarios'
+    id = Column(Integer, primary_key = True)
+    login = Column(String(80), unique = True)
+    senha = Column(String(80))
     
-class Atividades(Base):
+    def __repre__(self):
+        return '<Usuarios {}>'.format(self.login)    
+      
+class Atividades(Base,quickcommit):
     __tablename__ = 'atividades'
     id = Column(Integer, primary_key = True)
     nome = Column(String(80))
-    
+        
     #adicionando uma chave estrangeira
     pessoa_id = Column(Integer, ForeignKey("pessoas.id")) #Ex: ForeignKey("nome_tabela.id")
     pessoa = relationship("Pessoas") #Ex: relationship("Nome_da_classe")
-    
-    
+        
     
 def init_db():
     Base.metadata.create_all(bind = engine)

@@ -1,4 +1,4 @@
-from models import Pessoas
+from models import Pessoas, Atividades, Usuarios
 
 
 #insere dados na tabela pessoa  
@@ -6,12 +6,13 @@ def insere_pessoas():
     pessoa = Pessoas(nome = 'Mario', idade = 24)
     print(pessoa)
     pessoa.save()
-    
+
 #consulta dados na tabela pessoa  
 def consulta():
-    pessoas = Pessoas.query.filter_by(nome = 'Rafael')
-    for pessoa in pessoas:
-        print(f'nome: {pessoa.nome}, idade: {pessoa.idade}.')
+    pessoas = Pessoas.query.filter_by(nome = 'Maria').first()
+    print(pessoas.id)
+    #for pessoa in pessoas:
+        #print(f'nome: {pessoa.nome}, idade: {pessoa.idade}.')
 
 #retorna 'todos' os dados na tabela pessoa  
 def find_all(safequery=True):
@@ -35,9 +36,25 @@ def altera_pessoa():
 def excluir_pessoa():
     pessoa = Pessoas.query.filter_by(nome = 'Rafael').first()
     pessoa.delete()
+  
+
+def listar_usuarios():
+    usuarios = Usuarios.query.all()
     
+    print([{'login':usuario.login, 'senha': usuario.senha } for usuario in usuarios]) 
+    
+def cadastrarUsuario(login, senha):
+    usuarios =  Usuarios(login = login, senha = senha)
+    usuarios.save()
+    print({
+        'login': login,
+        'senha': senha,
+        'status': 'cadastrado com susseso'
+    })
 if __name__ == "__main__":
-    insere_pessoas()
+    #insere_pessoas()
     #consulta()
-    find_all()
+    cadastrarUsuario('root','lab123456')
+    listar_usuarios()
+    
     

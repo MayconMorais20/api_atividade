@@ -1,12 +1,25 @@
 from flask import Flask, request
 from flask_restful import Resource, Api
-from models import Pessoas, Atividades
+from flask_httpauth import HTTPBasicAuth
+from models import Pessoas, Atividades, Usuarios
 
+auth = HTTPBasicAuth()
+app  = Flask(__name__)
+api  = Api(app)
 
-app = Flask(__name__)
-api = Api(app)
+#USUARIOS = {
+    #'root': 'root123',
+    #'maycon':'Adm@Adm'
+#}
 
+@auth.verify_password
+def veirificacao(login, senha):
+    if not (login, senha):
+        return True
+    return Usuarios.query.filter_by(login= login, senha = senha).first()
+        
 class Pessoa(Resource):
+    @auth.login_required
     def get(self, nome):
         pessoa = Pessoas.query.filter_by(nome = nome).first()
         try:
@@ -21,7 +34,7 @@ class Pessoa(Resource):
                 'mensagem': 'registro nao encontrado'
             }
         return response
-    
+    @auth.login_required
     def put(self,nome):
         pessoa = Pessoas.query.filter_by(nome = nome).first()
         dado = request.json
@@ -36,7 +49,7 @@ class Pessoa(Resource):
             'idade': pessoa.idade
         }
         return response
- 
+    @auth.login_required
     def delete(self,nome):
         pessoa = Pessoas.query.filter_by(nome = nome ).first()
         mensagem = f'A pessoa {pessoa.nome}, foi excluida.'
@@ -47,12 +60,14 @@ class Pessoa(Resource):
         }
 
 class ListaPessoas(Resource):
+    
     def get(self):
         pessoas = Pessoas.query.all()
         response = [{'id': pessoa.id,'nome': pessoa.nome,'idade': pessoa.idade} for pessoa in pessoas] 
         
         return response
-
+    
+    @auth.login_required
     def post(self):
         dados = request.json
         pessoa = Pessoas(nome= dados['nome'],idade = dados['idade'])
